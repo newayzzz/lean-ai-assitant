@@ -1,15 +1,16 @@
 {
   "name": "lean-ai-assistant",
   "version": "2.0.0",
-  "description": "Next-Gen Lean AI Assistant - A comprehensive command-line tool for AI-powered Lean manufacturing guidance",
+  "description": "Next-Gen Lean AI Assistant - A comprehensive web application for AI-powered Lean manufacturing guidance",
   "type": "module",
   "scripts": {
     "install-deps": "pip install -r requirements.txt",
-    "start": "python main.py",
+    "start": "streamlit run app.py",
+    "start-cli": "python main.py",
     "start-openai": "python main.py openai",
     "start-asi1": "python main.py asi1",
-    "build": "echo 'This is a Python CLI application - no build step required. Use npm run start to run the application.'",
-    "dev": "python main.py",
+    "build": "echo 'This is a Python Streamlit application - no build step required. Use npm run start to run the web app.'",
+    "dev": "streamlit run app.py --server.runOnSave true",
     "setup": "cp .env.example .env && echo 'Please edit .env file with your API keys'"
   },
   "keywords": [
@@ -18,7 +19,8 @@
     "ai-assistant",
     "manufacturing",
     "python",
-    "cli"
+    "streamlit",
+    "web-app"
   ],
   "dependencies": {},
   "devDependencies": {},
