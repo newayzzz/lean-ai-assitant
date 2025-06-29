@@ -168,6 +168,10 @@ For issues or questions:
 2. Review the GitHub issues
 3. Create a new issue with detailed information
 
+## 👨‍💻 Author
+
+**Saqeb Newaz** - Creator and maintainer of the Next-Gen Lean AI Assistant
+
 ---
 
-**Made with ❤️ for the manufacturing community**
+**Made with ❤️ by Saqeb Newaz for the manufacturing community**

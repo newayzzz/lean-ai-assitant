@@ -262,6 +262,10 @@ except Exception as e:
    - Operating system
    - Steps to reproduce
 
+## 👨‍💻 Support
+
+For additional support, contact the creator: **Saqeb Newaz**
+
 ---
 
 **Remember: Never share your actual API keys in issues or support requests!**

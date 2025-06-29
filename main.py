@@ -1,6 +1,8 @@
 """
 Next-Gen Lean AI Assistant - Main Application
 A comprehensive tool for Lean manufacturing framework guidance and implementation.
+
+Created by: Saqeb Newaz
 """
 
 from ai_providers import get_ai_provider
@@ -32,6 +34,7 @@ class LeanAIAssistant:
         print(f"\n{'='*60}")
         print(f"🏭 {APP_NAME} v{VERSION}")
         print(f"🤖 Powered by: {self.provider_name.upper()}")
+        print(f"👨‍💻 Created by: Saqeb Newaz")
         print(f"{'='*60}")
         print("I'm here to help optimize your factory floor decisions with AI-powered")
         print("guidance on Lean manufacturing frameworks.")
@@ -175,7 +178,7 @@ class LeanAIAssistant:
                     continue
                 
             except KeyboardInterrupt:
-                print("\n\n👋 Thank you for using the Lean AI Assistant!")
+                print("\n\n👋 Thank you for using the Lean AI Assistant by Saqeb Newaz!")
                 break
             except ValueError as e:
                 print(f"\n⚠️ {e} Please choose a number between 1 and 5.")
@@ -204,6 +207,7 @@ def main():
         print("1. Check your API keys in .env file")
         print("2. Ensure you have internet connectivity")
         print("3. Verify your API quotas/limits")
+        print("\n👨‍💻 For support, contact: Saqeb Newaz")
         sys.exit(1)
 
 

@@ -1,5 +1,7 @@
 """
 Configuration settings for the Lean AI Assistant.
+
+Created by: Saqeb Newaz
 """
 
 import os
@@ -28,3 +30,4 @@ DEFAULT_AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
 # Application settings
 APP_NAME = "Next-Gen Lean AI Assistant"
 VERSION = "2.0.0"
+AUTHOR = "Saqeb Newaz"

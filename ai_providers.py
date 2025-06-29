@@ -1,6 +1,8 @@
 """
 AI Provider modules for different AI services.
 Supports both ASI1 Mini and OpenAI ChatGPT-4o.
+
+Created by: Saqeb Newaz
 """
 
 import os
@@ -80,7 +82,7 @@ class OpenAIProvider(AIProvider):
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are an expert Lean manufacturing consultant with deep knowledge of TPS, FPS, SPW, and Lean Six Sigma frameworks. Provide practical, actionable advice for factory floor optimization."
+                    "content": "You are an expert Lean manufacturing consultant with deep knowledge of TPS, FPS, SPW, and Lean Six Sigma frameworks. Provide practical, actionable advice for factory floor optimization. Created by Saqeb Newaz."
                 },
                 {
                     "role": "user",

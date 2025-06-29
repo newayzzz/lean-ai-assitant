@@ -1,5 +1,7 @@
 """
 Prompt templates for different types of AI interactions.
+
+Created by: Saqeb Newaz
 """
 
 from typing import Optional
