@@ -1,4 +1,4 @@
-# Next-Gen Lean AI Assistant
+# Next-Gen Lean AI Assistant Version 2.0
 
 A comprehensive command-line tool that provides AI-powered guidance on Lean manufacturing frameworks including Toyota Production System (TPS), Ford Production System (FPS), Stellantis Production Way (SPW), and Lean Six Sigma (LSS).
 
