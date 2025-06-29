@@ -11,6 +11,69 @@ from prompts import PromptTemplates
 from typing import Optional
 
 
+def run_assistant(framework: str, industry: str, provider: str, user_input: str) -> str:
+    """
+    Callable function for web interface integration.
+    
+    Args:
+        framework: Selected Lean framework name
+        industry: Selected industry
+        provider: AI provider ('openai' or 'asi1')
+        user_input: User's question or input
+    
+    Returns:
+        AI response as string
+    """
+    try:
+        # Initialize AI provider
+        ai = get_ai_provider(provider)
+        
+        # Map framework name to choice number
+        framework_mapping = {
+            "Toyota Production System (TPS)": "1",
+            "Ford Production System (FPS)": "2", 
+            "Stellantis Production Way (SPW)": "3",
+            "Lean Six Sigma (LSS)": "4"
+        }
+        
+        framework_choice = framework_mapping.get(framework, "1")
+        
+        # Generate appropriate prompt based on framework choice
+        if framework_choice in FRAMEWORKS:
+            framework_name = FRAMEWORKS[framework_choice]
+            # Create a custom prompt that incorporates the user's question
+            prompt = f"""
+            As an expert Lean manufacturing consultant specializing in {framework_name} for the {industry} industry, 
+            please provide detailed guidance on the following question:
+            
+            {user_input}
+            
+            Please structure your response to include:
+            1. Direct answer to the question
+            2. {framework_name} principles that apply
+            3. Industry-specific implementation considerations for {industry}
+            4. Practical next steps
+            
+            Keep the response comprehensive but actionable.
+            """
+        else:
+            # Fallback prompt
+            prompt = f"""
+            As a Lean manufacturing expert, please help with this question for the {industry} industry:
+            
+            {user_input}
+            
+            Provide practical, actionable advice based on Lean principles.
+            """
+        
+        # Get AI response
+        response = ai.call(prompt)
+        return response
+        
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
 class LeanAIAssistant:
     """Main application class for the Lean AI Assistant."""
     
@@ -190,7 +253,7 @@ class LeanAIAssistant:
 
 
 def main():
-    """Entry point for the application."""
+    """Entry point for the CLI application."""
     import sys
     
     # Allow provider selection via command line argument
