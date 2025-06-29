@@ -1,168 +1,210 @@
-from ai import call_gpt
+"""
+Next-Gen Lean AI Assistant - Main Application
+A comprehensive tool for Lean manufacturing framework guidance and implementation.
+"""
 
-"""
-We are creating a detailed prompt for an interactive Lean+SixSigma chatbot prototype.
-The goal is to guide factory floor decision-making by:
-    1. Identifying the user's industry,
-    2. Choosing their framework of interest (TPS, FPS, SPW, LSS),
-    3. Providing an interactive explanation of the chosen framework.
-"""
+from ai_providers import get_ai_provider
+from config import FRAMEWORKS, INDUSTRY_EXAMPLES, DEFAULT_AI_PROVIDER, APP_NAME, VERSION
+from prompts import PromptTemplates
+from typing import Optional
+
+
+class LeanAIAssistant:
+    """Main application class for the Lean AI Assistant."""
+    
+    def __init__(self, ai_provider: str = DEFAULT_AI_PROVIDER):
+        """Initialize the assistant with specified AI provider."""
+        try:
+            self.ai = get_ai_provider(ai_provider)
+            self.provider_name = ai_provider
+        except Exception as e:
+            print(f"⚠️ Error initializing AI provider '{ai_provider}': {e}")
+            print("Falling back to ASI1 Mini provider...")
+            try:
+                self.ai = get_ai_provider("asi1")
+                self.provider_name = "asi1"
+            except Exception as fallback_error:
+                print(f"❌ Fallback failed: {fallback_error}")
+                raise RuntimeError("No AI provider available. Please check your API keys.")
+    
+    def display_welcome(self) -> None:
+        """Display welcome message and app info."""
+        print(f"\n{'='*60}")
+        print(f"🏭 {APP_NAME} v{VERSION}")
+        print(f"🤖 Powered by: {self.provider_name.upper()}")
+        print(f"{'='*60}")
+        print("I'm here to help optimize your factory floor decisions with AI-powered")
+        print("guidance on Lean manufacturing frameworks.")
+    
+    def get_industry_input(self) -> str:
+        """Get industry input from user."""
+        industry_list = ", ".join(INDUSTRY_EXAMPLES)
+        return input(
+            f"\nTo tailor this experience, what industry are you in?\n"
+            f"Examples: {industry_list}\n"
+            f"Your industry: "
+        ).strip()
+    
+    def get_framework_choice(self) -> str:
+        """Get framework choice from user."""
+        print("\n🔧 Which Lean framework would you like to explore?")
+        for key, value in FRAMEWORKS.items():
+            print(f"{key}. {value}")
+        print("5. Compare frameworks")
+        
+        return input("Enter choice (1-5): ").strip()
+    
+    def process_framework_selection(self, choice: str, industry: str) -> tuple[Optional[str], str]:
+        """Process framework selection and generate appropriate prompt."""
+        if choice == '5':
+            prompt = PromptTemplates.framework_comparison(industry)
+            return None, prompt
+        elif choice in FRAMEWORKS:
+            framework = FRAMEWORKS[choice]
+            prompt = PromptTemplates.framework_guide(framework, industry)
+            return framework, prompt
+        else:
+            raise ValueError("Invalid framework selection")
+    
+    def display_response(self, response: str, industry: str) -> None:
+        """Display AI response with formatting."""
+        print("\n" + "=" * 60)
+        header = f"💡 YOUR {industry.upper()} LEAN ROADMAP"
+        print(header)
+        print("=" * 60)
+        print(response)
+    
+    def handle_follow_up(self, framework: Optional[str], industry: str) -> bool:
+        """Handle follow-up interactions. Returns True to continue, False to restart."""
+        if not framework:
+            return False  # No follow-up for comparison mode
+        
+        print("\n❓ What would you like to explore next?")
+        print("1. Implement in my factory")
+        print("2. See AI tools")
+        print("3. Restart")
+        
+        choice = input("Choice: ").strip()
+        
+        if choice == '1':
+            self.show_implementation_plan(framework, industry)
+        elif choice == '2':
+            self.show_ai_tools(framework, industry)
+        elif choice == '3':
+            return False  # Signal to restart
+        else:
+            print("\n⚠️ Invalid selection. Please choose a valid option.")
+        
+        return True
+    
+    def show_implementation_plan(self, framework: str, industry: str) -> None:
+        """Display implementation roadmap and KPIs."""
+        print("\n🚀 Generating custom implementation plan...")
+        
+        # Get implementation roadmap
+        roadmap_prompt = PromptTemplates.implementation_roadmap(framework, industry)
+        roadmap = self.ai.call(roadmap_prompt)
+        
+        print("\n" + "=" * 60)
+        print("📝 CUSTOM IMPLEMENTATION ROADMAP")
+        print("=" * 60)
+        print(roadmap)
+        
+        # Get KPIs
+        kpi_prompt = PromptTemplates.kpi_metrics(framework, industry)
+        kpis = self.ai.call(kpi_prompt)
+        
+        print("\n🎯 KEY PERFORMANCE INDICATORS")
+        print("=" * 40)
+        print(kpis)
+        
+        input("\nPress Enter to continue...")
+    
+    def show_ai_tools(self, framework: str, industry: str) -> None:
+        """Display AI tools recommendations and crisis communication integration."""
+        print("\n🤖 Curating AI solutions...")
+        
+        # Get AI tools recommendations
+        tools_prompt = PromptTemplates.ai_tools_recommendation(framework, industry)
+        tools = self.ai.call(tools_prompt)
+        
+        print("\n" + "=" * 60)
+        print("🛠️ AI TOOLKIT FOR LEAN IMPLEMENTATION")
+        print("=" * 60)
+        print(tools)
+        
+        # Get crisis communication integration
+        crisis_prompt = PromptTemplates.crisis_communication_integration()
+        crisis_info = self.ai.call(crisis_prompt)
+        
+        print("\n🚨 CRISIS COMMUNICATION INTEGRATION")
+        print("=" * 45)
+        print(crisis_info)
+        
+        input("\nPress Enter to continue...")
+    
+    def run(self) -> None:
+        """Main application loop."""
+        while True:
+            try:
+                self.display_welcome()
+                
+                # Get user inputs
+                industry = self.get_industry_input()
+                if not industry:
+                    print("⚠️ Industry is required. Please try again.")
+                    continue
+                
+                framework_choice = self.get_framework_choice()
+                
+                print("\n🤖 Analyzing your selection...")
+                
+                # Process selection and get AI response
+                selected_framework, prompt = self.process_framework_selection(framework_choice, industry)
+                response = self.ai.call(prompt)
+                
+                # Display response
+                self.display_response(response, industry)
+                
+                # Handle follow-up interactions
+                while True:
+                    if not self.handle_follow_up(selected_framework, industry):
+                        break  # Break inner loop to restart
+                    
+                    # Continue follow-up loop
+                    continue
+                
+            except KeyboardInterrupt:
+                print("\n\n👋 Thank you for using the Lean AI Assistant!")
+                break
+            except ValueError as e:
+                print(f"\n⚠️ {e} Please choose a number between 1 and 5.")
+                continue
+            except Exception as e:
+                print(f"\n❌ An error occurred: {e}")
+                print("Please try again or contact support.")
+                continue
+
 
 def main():
-    industry_identification = input(
-        "🏭 Welcome to the Next-Gen Lean AI Assistant! I'm here to help optimize your factory floor decisions.\n"
-        "To tailor this experience, what industry are you in? Examples:\n"
-        "- Automotive, Electronics, Pharmaceuticals, Mining & Metals,\n"
-        "- Aerospace, Food Processing, Textile/Apparel, Medical Devices,\n"
-        "- Consumer Goods, Renewable Energy, Biotech, Construction Materials,\n"
-        "- Chemicals, Plastics & Composites, Agriculture Equipment,\n"
-        "- Defense Manufacturing, Industrial Machinery, or something else?\n"
-        "Your industry: "
-    )
-
-    framework_choice = input(
-        "\n🔧 Thank you. Which Lean framework would you like to explore?\n"
-        "1. TPS - Toyota Production System\n"
-        "2. FPS - Ford Production System\n"
-        "3. SPW - Stellantis Production Way\n"
-        "4. LSS - Lean Six Sigma\n"
-        "5. Compare frameworks\n"
-        "Enter choice (1-5): "
-    )
-
-    print("\n🤖 Analyzing your selection...")
-
-    frameworks = {
-        '1': 'Toyota Production System (TPS)',
-        '2': 'Ford Production System (FPS)',
-        '3': 'Stellantis Production Way (SPW)',
-        '4': 'Lean Six Sigma (LSS)'
-    }
-
-    # Build the prompt based on selection
-    if framework_choice == '5':
-        prompt = (
-            f"Compare Toyota Production System (TPS), Ford Production System (FPS), "
-            f"Stellantis Production Way (SPW), and Lean Six Sigma highlighting:\n"
-            f"- Core principles and differences\n"
-            f"- Best-fit industries (especially {industry_identification})\n"
-            f"- AI integration opportunities\n"
-            f"- Real-world Canadian examples where relevant\n"
-            f"Structure: Concise comparison table then 2-sentence summary per framework."
-        )
-        selected_framework = None
-
-    elif framework_choice in frameworks:
-        selected_framework = frameworks[framework_choice]
-        prompt = (
-            f"Create interactive guide for {selected_framework} in the {industry_identification} industry covering:\n"
-            f"1. Core principles (max 3 key concepts)\n"
-            f"2. Industry-specific implementation roadmap\n"
-            f"3. AI integration opportunities (reference Toyota/HBR examples)\n"
-            f"4. Canadian case study example\n"
-            f"5. Interactive options: 'Dive deeper into [concept]', 'See simulation', 'Compare frameworks'\n"
-            f"Format: Conversational tone with emoji section breaks 🇨🇦"
-        )
-    else:
-        print("\n⚠️ Invalid framework selection. Please choose a number between 1 and 5.")
-        return
-
-    # Generate and display response
-    response = call_gpt(prompt)
-    print("\n" + "=" * 50)
-    header = f"💡 YOUR {industry_identification.upper()} LEAN ROADMAP"
-    print(header)
-    print("=" * 50)
-    print(response)
-
-    # Follow-up interaction loop
-    while True:
-        follow_up = input(
-            "\n❓ What would you like to explore next?\n"
-            "1. Implement in my factory\n"
-            "2. See AI tools\n"
-            "3. Restart\n"
-            "Choice: "
-        )
-
-        if follow_up == '1' and selected_framework:
-            print("\n🚀 Generating custom implementation plan...")
-            implementation_prompt = (
-                f"Create a 6-month implementation roadmap for {selected_framework} in the {industry_identification} industry with Canadian context:\n"
-                "1. **Phase 1: Assessment (Month 1)**\n"
-                "   - Current state value stream mapping\n"
-                "   - Waste identification (7+1 wastes)\n"
-                "   - Canadian regulatory compliance checklist\n"
-                "2. **Phase 2: Pilot Design (Month 2)**\n"
-                "   - Select 3 high-impact processes for Kaizen events\n"
-                "   - AI integration opportunities assessment\n"
-                "   - Cross-functional team formation\n"
-                "3. **Phase 3: Execution (Months 3-4)**\n"
-                "   - Standardized work documentation\n"
-                "   - Visual management system setup\n"
-                "   - AI-powered real-time monitoring\n"
-                "4. **Phase 4: Scale & Sustain (Months 5-6)**\n"
-                "   - Full deployment across production lines\n"
-                "   - Digital Andon system implementation\n"
-                "   - Continuous improvement cadence\n"
-                "Include Canadian-specific:\n"
-                "- Supply chain considerations\n"
-                "- Labor regulations\n"
-                "- Climate impact mitigation"
-            )
-            implementation_plan = call_gpt(implementation_prompt)
-            print("\n" + "=" * 50)
-            print("📝 CUSTOM IMPLEMENTATION ROADMAP")
-            print("=" * 50)
-            print(implementation_plan)
-
-            kpi_prompt = (
-                f"Create 5 SMART KPIs for {selected_framework} implementation in Canadian {industry_identification} sector with AI integration targets"
-            )
-            kpis = call_gpt(kpi_prompt)
-            print("\n🎯 KEY PERFORMANCE INDICATORS")
-            print(kpis)
-            input("\nPress Enter to continue...")
-
-        elif follow_up == '2' and selected_framework:
-            print("\n🤖 Curating AI solutions...")
-            ai_prompt = (
-                f"Recommend AI tools for {selected_framework} implementation in {industry_identification} with Canadian availability:\n"
-                "1. **Predictive Maintenance** (2 tools with pricing)\n"
-                "2. **Quality Control** (2 computer vision solutions)\n"
-                "3. **Supply Chain Optimization** (1 Canadian-specific platform)\n"
-                "4. **Real-time Analytics** (1 edge computing solution)\n"
-                "For each:\n"
-                "- Vendor name & Canadian availability\n"
-                "- Integration requirements\n"
-                "- ROI case study summary\n"
-                "- Free trial information"
-            )
-            ai_tools = call_gpt(ai_prompt)
-            print("\n" + "=" * 50)
-            print("🛠️ AI TOOLKIT FOR LEAN IMPLEMENTATION")
-            print("=" * 50)
-            print(ai_tools)
-
-            crisis_prompt = (
-                "Integrate crisis communication features from knowledge graph:\n"
-                "1. Two-way communication alerts\n"
-                "2. Emergency Operations protocols\n"
-                "3. Business crisis communication templates\n"
-                "Show how these interface with Lean AI systems"
-            )
-            crisis_integration = call_gpt(crisis_prompt)
-            print("\n🚨 CRISIS COMMUNICATION INTEGRATION")
-            print(crisis_integration)
-
-        elif follow_up == '3':
-            print("\n🔄 Restarting session...")
-            main()
-            return
-
-        else:
-            print("\n⚠️ Invalid selection or no framework chosen. Please choose a valid option.")
-            continue
+    """Entry point for the application."""
+    import sys
+    
+    # Allow provider selection via command line argument
+    provider = DEFAULT_AI_PROVIDER
+    if len(sys.argv) > 1:
+        provider = sys.argv[1]
+    
+    try:
+        assistant = LeanAIAssistant(provider)
+        assistant.run()
+    except Exception as e:
+        print(f"❌ Failed to start application: {e}")
+        print("\nTroubleshooting tips:")
+        print("1. Check your API keys in .env file")
+        print("2. Ensure you have internet connectivity")
+        print("3. Verify your API quotas/limits")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
